@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -15,9 +16,8 @@ public class SwerveSubsystem extends Subsystem {
 	private static double STATIC_ROT_COEF = .9;
 
 	private SwerveWheel[] m_wheels;
-	private PIDSource m_gyro;
+	private ADXRS450_Gyro m_gyro;
 	private PIDController m_pidController;
-	private double m_pidOutput;
 
 	private double m_transX;
 	private double m_transY;
@@ -26,16 +26,16 @@ public class SwerveSubsystem extends Subsystem {
 	private boolean m_isTurning;
 	private double m_maxWheelDistance;
 
-	public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, PIDSource gyro, PidConfig pidConfig,
-			double dynSpeedCoef, double stcTransCoef, double stcRotCoef) {
-		this(wheels, pivotLoc, gyro, pidConfig);
+	// public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, PIDSource gyro, PidConfig pidConfig,
+	// 		double dynSpeedCoef, double stcTransCoef, double stcRotCoef) {
+	// 	this(wheels, pivotLoc, gyro, pidConfig);
 
-		DYNAMIC_SPEED_COEF = dynSpeedCoef;
-		STATIC_TRANS_COEF = stcTransCoef;
-		STATIC_ROT_COEF = stcRotCoef;
-	}
+	// 	DYNAMIC_SPEED_COEF = dynSpeedCoef;
+	// 	STATIC_TRANS_COEF = stcTransCoef;
+	// 	STATIC_ROT_COEF = stcRotCoef;
+	// }
 
-	public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, PIDSource gyro, PidConfig pidConfig) {
+	public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, ADXRS450_Gyro gyro, PidConfig pidConfig) {
 		this.m_wheels = wheels;
 
 		for (SwerveWheel s : wheels) {
@@ -46,12 +46,12 @@ public class SwerveSubsystem extends Subsystem {
 
 		this.m_gyro = gyro;
 
-		this.m_pidController = new PIDController(pidConfig.kP, pidConfig.kI, pidConfig.kD, this.m_gyro,
-				(output) -> this.m_pidOutput = output);
-		this.m_pidController.setAbsoluteTolerance(pidConfig.tolerance);
-		this.m_pidController.setOutputRange(-0.4, 0.4);
-		this.m_pidController.setInputRange(0, 360);
-		this.m_pidController.setContinuous();
+		// this.m_pidController = new PIDController(pidConfig.kP, pidConfig.kI, pidConfig.kD, this.m_gyro,
+		// 		(output) -> this.m_pidOutput = output);
+		this.m_pidController = new PIDController(pidConfig.kP, pidConfig.kI, pidConfig.kD);
+		this.m_pidController.setTolerance(pidConfig.tolerance);
+		this.m_pidController.enableContinuousInput(0, 360);
+		this.m_pidController.reset();
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class SwerveSubsystem extends Subsystem {
 		this.m_pidController.setSetpoint(n);
 	}
 
-	public PIDSource getGyro() {
+	public ADXRS450_Gyro getGyro() {
 		return this.m_gyro;
 	}
 
@@ -103,9 +103,9 @@ public class SwerveSubsystem extends Subsystem {
 	 */
 	public void dynamicGainDrive() {
 		// Gyro coords are continuous so this restricts it to 360
-		double currentHead = ((this.m_gyro.pidGet() % 360) + 360) % 360;
+		double currentHead = ((this.m_gyro.getAngle() % 360) + 360) % 360;
 
-		double rotationInput = this.m_pidOutput;
+		double rotationInput = this.m_pidController.calculate(this.m_gyro.getAngle());
 		if (this.m_rotVal != 0.0) {
 			rotationInput = this.m_rotVal;
 			this.m_isTurning = true;
@@ -153,35 +153,35 @@ public class SwerveSubsystem extends Subsystem {
 	 * There is a maximum speed at which the robot will rotate, and maximum speed at
 	 * which the robot will translate.
 	 */
-	public void staticGainDrive() {
-		// Gyro coords are continuous so this restricts it to 360
-		double currentHead = ((this.m_gyro.pidGet() % 360) + 360) % 360;
+	// public void staticGainDrive() {
+	// 	// Gyro coords are continuous so this restricts it to 360
+	// 	double currentHead = ((this.m_gyro.pidGet() % 360) + 360) % 360;
 
-		double rotationInput = this.m_pidOutput;
-		if (this.m_rotVal != 0.0) {
-			rotationInput = this.m_rotVal;
-			this.m_isTurning = true;
-		} else if (this.m_rotVal == 0.0 && this.m_isTurning) {
-			this.m_pidController.setSetpoint(currentHead);
-			this.m_isTurning = false;
-		}
+	// 	double rotationInput = this.m_pidOutput;
+	// 	if (this.m_rotVal != 0.0) {
+	// 		rotationInput = this.m_rotVal;
+	// 		this.m_isTurning = true;
+	// 	} else if (this.m_rotVal == 0.0 && this.m_isTurning) {
+	// 		this.m_pidController.setSetpoint(currentHead);
+	// 		this.m_isTurning = false;
+	// 	}
 
-		// Doing math with each of the vectors for the SwerveWheels
-		// Calculating the rotation vector, then adding that to the translation vector
-		// Converting them to polar vectors
-		double[][] vectors = new double[m_wheels.length][2];
-		for (int i = 0; i < m_wheels.length; i++) {
-			vectors[i][0] = m_wheels[i].getRotationVector()[0] * (1 / this.m_maxWheelDistance) * (rotationInput * STATIC_ROT_COEF)
-					+ (m_transX * STATIC_TRANS_COEF);
-			vectors[i][1] = m_wheels[i].getRotationVector()[1] * (1 / this.m_maxWheelDistance) * (rotationInput * STATIC_ROT_COEF)
-					+ (m_transY * STATIC_TRANS_COEF);
-			vectors[i] = AngleUtilities.cartesianToPolar(vectors[i]);
-		}
+	// 	// Doing math with each of the vectors for the SwerveWheels
+	// 	// Calculating the rotation vector, then adding that to the translation vector
+	// 	// Converting them to polar vectors
+	// 	double[][] vectors = new double[m_wheels.length][2];
+	// 	for (int i = 0; i < m_wheels.length; i++) {
+	// 		vectors[i][0] = m_wheels[i].getRotationVector()[0] * (1 / this.m_maxWheelDistance) * (rotationInput * STATIC_ROT_COEF)
+	// 				+ (m_transX * STATIC_TRANS_COEF);
+	// 		vectors[i][1] = m_wheels[i].getRotationVector()[1] * (1 / this.m_maxWheelDistance) * (rotationInput * STATIC_ROT_COEF)
+	// 				+ (m_transY * STATIC_TRANS_COEF);
+	// 		vectors[i] = AngleUtilities.cartesianToPolar(vectors[i]);
+	// 	}
 
 
-		for (int i = 0; i < m_wheels.length; i++) {
-			m_wheels[i].setHeadAndVelocity(vectors[i][0], vectors[i][1]);
-		}
-	}
+	// 	for (int i = 0; i < m_wheels.length; i++) {
+	// 		m_wheels[i].setHeadAndVelocity(vectors[i][0], vectors[i][1]);
+	// 	}
+	// }
 
 }

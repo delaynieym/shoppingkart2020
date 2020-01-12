@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
     this.leftBack = new SwerveWheel(RobotMap.leftBackDrive, RobotMap.leftBackTurn, RobotMap.leftBackTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.leftBackLoc);
     this.leftBack = new SwerveWheel(RobotMap.leftBackDrive, RobotMap.leftBackTurn, RobotMap.leftBackTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.leftBackLoc);
 
-    this.swerveSubsystem = new SwerveSubsystem(this.wheels, RobotMap.pivotLoc, new ADXRS450_Gyro(), RobotMap.headingPidConfig);
+    this.swerveSubsystem = new SwerveSubsystem(this.wheels, RobotMap.pivotLoc, RobotMap.gyro, RobotMap.headingPidConfig);
   }
 
   /**

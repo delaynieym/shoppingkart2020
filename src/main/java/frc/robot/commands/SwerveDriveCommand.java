@@ -40,7 +40,6 @@ public class SwerveDriveCommand extends Command {
   @Override
   protected void initialize() {
       m_subsystem.getPidController().reset();
-      m_subsystem.getPidController().enable();
   }
 
   // Called repeatedly when this Command is scheduled to run
@@ -78,7 +77,7 @@ public class SwerveDriveCommand extends Command {
   // Called once after isFinished returns true
   @Override
   protected void end() {
-      m_subsystem.getPidController().disable();
+    //   m_subsystem.getPidController().disable();
       m_subsystem.setTranslationVector(0, 0);
       m_subsystem.setRotationVector(0);
   }
