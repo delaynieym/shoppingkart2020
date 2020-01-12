@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -26,6 +27,7 @@ import frc.robot.util.AbsoluteEncoder;
  * project.
  */
 public class Robot extends TimedRobot {
+
   private static Robot instance;
 
   public static OI m_oi = new OI();
@@ -40,7 +42,6 @@ public class Robot extends TimedRobot {
   private SwerveWheel leftBack;
   private SwerveWheel rightBack;
 
-  private SwerveWheel[] wheels = {rightFront,leftFront,leftBack,rightBack};
 
 
   public static synchronized Robot getInstance() {
@@ -62,9 +63,12 @@ public class Robot extends TimedRobot {
     this.rightFront = new SwerveWheel(RobotMap.rightFrontDrive, RobotMap.rightFrontTurn, RobotMap.rightFrontTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.rightFrontLoc);
     this.leftFront = new SwerveWheel(RobotMap.leftFrontDrive, RobotMap.leftFrontTurn, RobotMap.leftFrontTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.leftFrontLoc);
     this.leftBack = new SwerveWheel(RobotMap.leftBackDrive, RobotMap.leftBackTurn, RobotMap.leftBackTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.leftBackLoc);
-    this.leftBack = new SwerveWheel(RobotMap.leftBackDrive, RobotMap.leftBackTurn, RobotMap.leftBackTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.leftBackLoc);
+    this.rightBack = new SwerveWheel(RobotMap.rightBackDrive, RobotMap.rightBackTurn, RobotMap.rightBackTurnEncoder, RobotMap.wheelPidConfig , RobotMap.pivotLoc, RobotMap.rightBackLoc);
+    
+    SwerveWheel[] wheels = {rightFront,leftFront,leftBack,rightBack};
 
-    this.swerveSubsystem = new SwerveSubsystem(this.wheels, RobotMap.pivotLoc, RobotMap.gyro, RobotMap.headingPidConfig);
+    this.swerveSubsystem = new SwerveSubsystem(wheels, RobotMap.pivotLoc, RobotMap.gyro, RobotMap.headingPidConfig);
+
   }
 
   /**
@@ -78,7 +82,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("analog encoder right front", RobotMap.rightFrontTurnEncoder.get());
+    SmartDashboard.putNumber("analog encoder right front",  RobotMap.rightFrontTurnEncoder.get());
   }
 
   /**

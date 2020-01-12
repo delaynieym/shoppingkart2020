@@ -11,81 +11,85 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.SwerveSubsystem;
 
 /**
  * An example command. You can replace me with your own command.
  */
-public class SwerveDriveCommand extends Command {
-    private SwerveSubsystem m_subsystem;
-    private BooleanSupplier m_fieldRelative;
+public class SwerveDriveCommand extends CommandBase {
+    private final SwerveSubsystem m_subsystem;
+  private final BooleanSupplier m_fieldRelative;
 
-    private DoubleSupplier translationX;
-    private DoubleSupplier translationY;
-    private DoubleSupplier rotation;
+  private final DoubleSupplier translationX;
+  private final DoubleSupplier translationY;
+  private final DoubleSupplier rotation;
 
-    public SwerveDriveCommand(BooleanSupplier fieldRelative, DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation) {
-        requires(Robot.getInstance().swerveSubsystem);
-        this.m_subsystem = Robot.getInstance().swerveSubsystem;
+  public SwerveDriveCommand(SubsystemBase sub, final BooleanSupplier fieldRelative,
+      final DoubleSupplier translationX, final DoubleSupplier translationY, final DoubleSupplier rotation) {
+    System.out.println(Robot.getInstance().swerveSubsystem == null);
 
-        this.m_fieldRelative = fieldRelative;
-        this.translationX = translationX;
-        this.translationY = translationY;
-        this.rotation = rotation;
+    addRequirements(sub);
+    this.m_subsystem = (SwerveSubsystem) sub;
 
-    }
+    this.m_fieldRelative = fieldRelative;
+    this.translationX = translationX;
+    this.translationY = translationY;
+    this.rotation = rotation;
 
-    // Called just before this Command runs the first time
+  }
+
+  // Called just before this Command runs the first time
   @Override
-  protected void initialize() {
-      m_subsystem.getPidController().reset();
+  public void initialize() {
+    m_subsystem.getPidController().reset();
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
-  protected void execute() {
+  public void execute() {
     if (this.m_fieldRelative.getAsBoolean()) {
-        // Gyro coords are continous so this restricts it to 360 degrees
-        double robotAngle = ((this.m_subsystem.getGyro().pidGet() % 360) + 360) % 360;
-        // Temporary save of x and y pre-translation
-        double tempX = translationX.getAsDouble();
-       double tempY = translationY.getAsDouble();
+      // Gyro coords are continous so this restricts it to 360 degrees
+      final double robotAngle = ((this.m_subsystem.getGyro().pidGet() % 360) + 360) % 360;
+      // Temporary save of x and y pre-translation
+      final double tempX = translationX.getAsDouble();
+      final double tempY = translationY.getAsDouble();
 
-        // Overwriting x and y
-        double leftStickX = (tempX * Math.cos(Math.toRadians(robotAngle)))
-                - (tempY * Math.sin(Math.toRadians(robotAngle)));
-        double leftStickY = (tempX * Math.sin(Math.toRadians(robotAngle)))
-                + (tempY * Math.cos(Math.toRadians(robotAngle)));
-        m_subsystem.setTranslationVector(leftStickX, leftStickY);
-        m_subsystem.setRotationVector(rotation.getAsDouble());
+      // Overwriting x and y
+      final double leftStickX = (tempX * Math.cos(Math.toRadians(robotAngle)))
+          - (tempY * Math.sin(Math.toRadians(robotAngle)));
+      final double leftStickY = (tempX * Math.sin(Math.toRadians(robotAngle)))
+          + (tempY * Math.cos(Math.toRadians(robotAngle)));
+      m_subsystem.setTranslationVector(leftStickX, leftStickY);
+      m_subsystem.setRotationVector(rotation.getAsDouble());
+    } else {
+      m_subsystem.setTranslationVector(translationX.getAsDouble(), translationY.getAsDouble());
+      m_subsystem.setRotationVector(rotation.getAsDouble());
     }
-    else {
-        m_subsystem.setTranslationVector(translationX.getAsDouble(), translationY.getAsDouble());
-        m_subsystem.setRotationVector(rotation.getAsDouble());
-    }
-
 
   }
 
   // Make this return true when this Command no longer needs to run execute()
   @Override
-  protected boolean isFinished() {
+  public boolean isFinished() {
     return false;
   }
 
   // Called once after isFinished returns true
-  @Override
-  protected void end() {
-    //   m_subsystem.getPidController().disable();
-      m_subsystem.setTranslationVector(0, 0);
-      m_subsystem.setRotationVector(0);
-  }
+  // @Override
+  // public void end() {
+  //   //   m_subsystem.getPidController().disable();
+  //     m_subsystem.setTranslationVector(0, 0);
+  //     m_subsystem.setRotationVector(0);
+  // }
 
-  // Called when another command which requires one or more of the same
-  // subsystems is scheduled to run
-  @Override
-  protected void interrupted() {
-      end();
-  }
+  // // Called when another command which requires one or more of the same
+  // // subsystems is scheduled to run
+  // @Override
+  // protected void interrupted() {
+  //     end();
+  // }
 }

@@ -1,16 +1,21 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.commands.SwerveDriveCommand;
+// import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.AngleUtilities;
 import frc.robot.util.PidConfig;
 
-public class SwerveSubsystem extends Subsystem {
+public class SwerveSubsystem extends SubsystemBase {
+
 	private static double DYNAMIC_SPEED_COEF = 1;
 	private static double STATIC_TRANS_COEF = .1;
 	private static double STATIC_ROT_COEF = .9;
@@ -24,21 +29,23 @@ public class SwerveSubsystem extends Subsystem {
 	private double m_rotVal;
 
 	private boolean m_isTurning;
-	private double m_maxWheelDistance;
+	private double m_maxWheelDistance = 0;
 
-	// public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, PIDSource gyro, PidConfig pidConfig,
-	// 		double dynSpeedCoef, double stcTransCoef, double stcRotCoef) {
-	// 	this(wheels, pivotLoc, gyro, pidConfig);
+	// public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, PIDSource
+	// gyro, PidConfig pidConfig,
+	// double dynSpeedCoef, double stcTransCoef, double stcRotCoef) {
+	// this(wheels, pivotLoc, gyro, pidConfig);
 
-	// 	DYNAMIC_SPEED_COEF = dynSpeedCoef;
-	// 	STATIC_TRANS_COEF = stcTransCoef;
-	// 	STATIC_ROT_COEF = stcRotCoef;
+	// DYNAMIC_SPEED_COEF = dynSpeedCoef;
+	// STATIC_TRANS_COEF = stcTransCoef;
+	// STATIC_ROT_COEF = stcRotCoef;
 	// }
 
 	public SwerveSubsystem(SwerveWheel[] wheels, double[] pivotLoc, ADXRS450_Gyro gyro, PidConfig pidConfig) {
 		this.m_wheels = wheels;
 
 		for (SwerveWheel s : wheels) {
+			System.out.println(s.getRadius());
 			if (s.getRadius() > this.m_maxWheelDistance) {
 				this.m_maxWheelDistance = s.getRadius();
 			}
@@ -46,17 +53,19 @@ public class SwerveSubsystem extends Subsystem {
 
 		this.m_gyro = gyro;
 
-		// this.m_pidController = new PIDController(pidConfig.kP, pidConfig.kI, pidConfig.kD, this.m_gyro,
-		// 		(output) -> this.m_pidOutput = output);
+		// this.m_pidController = new PIDController(pidConfig.kP, pidConfig.kI,
+		// pidConfig.kD, this.m_gyro,
+		// (output) -> this.m_pidOutput = output);
 		this.m_pidController = new PIDController(pidConfig.kP, pidConfig.kI, pidConfig.kD);
 		this.m_pidController.setTolerance(pidConfig.tolerance);
 		this.m_pidController.enableContinuousInput(0, 360);
 		this.m_pidController.reset();
-	}
 
-	@Override
-	public void initDefaultCommand() {
-		setDefaultCommand(new SwerveDriveCommand(() -> Robot.m_oi.xbox.getAButton(), () -> Robot.m_oi.xbox.getX(Hand.kLeft), () -> Robot.m_oi.xbox.getY(Hand.kLeft), () -> Robot.m_oi.xbox.getX(Hand.kRight)));
+		setDefaultCommand((CommandBase) new SwerveDriveCommand(this, () -> Robot.m_oi.xbox.getAButton(),
+				() -> Robot.m_oi.xbox.getX(Hand.kLeft), () -> Robot.m_oi.xbox.getY(Hand.kLeft),
+				() -> Robot.m_oi.xbox.getX(Hand.kRight)));
+
+
 	}
 
 	/**

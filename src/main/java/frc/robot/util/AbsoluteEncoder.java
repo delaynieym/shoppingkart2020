@@ -1,63 +1,53 @@
 package frc.robot.util;
 
+import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class AbsoluteEncoder implements PIDSource {
+public class AbsoluteEncoder {
 	/**
-	* this class is mainly a wrapper for accessing the current position of rotation
-	* that the motor is at
-	* it uses the potentiometer values as voltage and correlates them to rotation
-	* degrees
-	*/
+	 * this class is mainly a wrapper for accessing the current position of rotation
+	 * that the motor is at it uses the potentiometer values as voltage and
+	 * correlates them to rotation degrees
+	 */
 
 	private AnalogInput analogIn;
-	private double offset; // the offset from zero for each motor
-	private PIDSourceType sourceType;
-	private double voltageToDegrees;
+	private double offset = 0; // the offset from zero for each motor
+	private boolean isInverted;
+	private double voltageToDegrees = 72;
+	private AnalogEncoder x;
 
 	/**
 	 * Constructor for an absolute encoder
-	 * @param channel Analog port for the Encoder
-	 * @param offset The value to subtract to change where 0 degrees is
+	 * 
+	 * @param channel    Analog port for the Encoder
 	 * @param isInverted Changes which direction increases/decreases the encoder
 	 */
-	public AbsoluteEncoder(int channel, double offset, boolean isInverted) {
+	public AbsoluteEncoder(int channel, boolean isInverted) {
 		analogIn = new AnalogInput(channel);
-		this.offset = offset;
-		this.sourceType = PIDSourceType.kDisplacement;
-
-		if (isInverted) {
-			this.offset += 360;
-			this.voltageToDegrees = -72;
-		} else {
-			this.voltageToDegrees = 72;
-		}
+		this.x = new AnalogEncoder(analogIn);
+		this.isInverted = isInverted;
 	}
 
 	/**
 	 * Gets rotation in degrees
+	 * 
 	 * @return the position of encoder in degrees
 	 */
-	public double getRotation() { // in degrees
-		return (this.analogIn.getVoltage() * this.voltageToDegrees + offset) % 360;
+	public double get() {
+		if (isInverted) {
+			return ((5 - analogIn.getVoltage()) * this.voltageToDegrees) - this.offset;
+		}
 
+		else {
+			return (analogIn.getVoltage() * this.voltageToDegrees) - this.offset;
+		}
 	}
 
-	@Override
-	public void setPIDSourceType(PIDSourceType pidSource) {
-		this.sourceType = pidSource;
-	}
-
-	@Override
-	public PIDSourceType getPIDSourceType() {
-		return this.sourceType;
-	}
-
-	@Override
-	public double pidGet() {
-		return this.getRotation();
+	public void reset() {
+		this.offset = analogIn.getVoltage() * this.voltageToDegrees;
 	}
 
 }

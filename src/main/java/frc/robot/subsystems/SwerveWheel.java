@@ -15,7 +15,7 @@ public class SwerveWheel {
 
 	private SpeedController m_driveMotor;
 	private SpeedController m_turnMotor;
-	private AnalogEncoder m_encoder;
+	private AbsoluteEncoder m_encoder;
 	private PIDController m_pidController;
 
 	private double[] m_rotationVector;
@@ -28,7 +28,7 @@ public class SwerveWheel {
 	 * @param pidConfig		A {@link frc.robot.util.PidConfig PidConfig} holding the values for setting up a PIDController.  
 	 * @param radiusVector	
 	 */
-	public SwerveWheel(CANSparkMax driveMotor, WPI_TalonSRX turnMotor, AnalogEncoder encoder, PidConfig pidConfig,
+	public SwerveWheel(CANSparkMax driveMotor, WPI_TalonSRX turnMotor, AbsoluteEncoder encoder, PidConfig pidConfig,
 			double[] pivotLoc, double[] wheelLoc) {
 
 		this.m_driveMotor = driveMotor;

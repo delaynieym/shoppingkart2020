@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.SpeedController;
+import frc.robot.util.AbsoluteEncoder;
 import frc.robot.util.PidConfig;
 
 /**
@@ -44,22 +45,22 @@ public class RobotMap {
   public static CANSparkMax rightFrontDrive = new CANSparkMax(7, MotorType.kBrushless);
   public static WPI_TalonSRX rightFrontTurn = new WPI_TalonSRX(5);
   // public static CANEncoder rightFrontDriveEncoder = ((CANSparkMax) rightFrontDrive).getEncoder();
-  public static AnalogEncoder rightFrontTurnEncoder = new AnalogEncoder(new AnalogInput(0));
+  public static AbsoluteEncoder rightFrontTurnEncoder = new AbsoluteEncoder(0, true);
 
   public static CANSparkMax leftFrontDrive = new CANSparkMax(8, MotorType.kBrushless);
   public static WPI_TalonSRX leftFrontTurn = new WPI_TalonSRX(3);
   // public static CANEncoder leftFrontDriveEncoder = ((CANSparkMax) leftFrontDrive).getEncoder();
-  public static AnalogEncoder leftFrontTurnEncoder = new AnalogEncoder(new AnalogInput(1));
+  public static AbsoluteEncoder leftFrontTurnEncoder = new AbsoluteEncoder(1, true);
 
   public static CANSparkMax leftBackDrive = new CANSparkMax(9, MotorType.kBrushless);
   public static WPI_TalonSRX leftBackTurn = new WPI_TalonSRX(1);
   // public static CANEncoder leftBackDriveEncoder = ((CANSparkMax) leftBackDrive).getEncoder();
-  public static AnalogEncoder leftBackTurnEncoder = new AnalogEncoder(new AnalogInput(2));
+  public static AbsoluteEncoder leftBackTurnEncoder = new AbsoluteEncoder(2, true);
 
   public static CANSparkMax rightBackDrive = new CANSparkMax(10, MotorType.kBrushless);
   public static WPI_TalonSRX rightBackTurn = new WPI_TalonSRX(2);
   // public static CANEncoder rightBackDriveEncoder = ((CANSparkMax) rightBackDrive).getEncoder();
-  public static AnalogEncoder rightBackTurnEncoder = new AnalogEncoder(new AnalogInput(3));
+  public static AbsoluteEncoder rightBackTurnEncoder = new AbsoluteEncoder(3, true);
 
   public static ADXRS450_Gyro gyro = new ADXRS450_Gyro();
   
